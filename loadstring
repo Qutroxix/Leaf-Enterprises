@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Qutroxix/Leaf-Enterprises/refs/heads/main/source"))()
