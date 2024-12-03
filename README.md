@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Leaf Bot** is an advanced and interactive Roblox bot designed to provide custom features, whitelist management, and multiple utilities for admins and whitelisted players. It works seamlessly within both **SFOth** and **SFOth IV** games, offering powerful commands, role management, and immersive interactions for those who are whitelisted.
+**Leaf Bot** is an advanced and interactive Roblox bot designed to provide custom features, whitelist management, and multiple utilities for admins and whitelisted players. It works seamlessly within both **SFOTH** and **SFOTH IV**, offering powerful commands, role management, and immersive interactions for those who are whitelisted.
 
 This bot includes a robust command structure, role management, and specialized abilities, like invisibility, invincibility, and teleportation. It also features a unique system for handling whitelisted players and even allows admins to assign special roles for those who meet specific requirements.
 
