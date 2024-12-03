@@ -53,7 +53,7 @@ The bot can be executed and configured specifically for either **SFOth** or **SF
 
 1. **Roblox Studio**: You need Roblox Studio to add the bot to your game.
 2. **Roblox API Access**: Ensure you have proper permissions to modify the game and access player data for roles.
-3. **Game Specific Adjustments**: Make sure that you have configured the bot to work specifically with **SFOth** and **SFOth IV** as both games may have different event and command handling.
+3. **Game Specific Adjustments**: Make sure that you have configured the bot to work specifically with **SFOTH** and **SFOTH IV** as both games may have different event and command handling.
 
 ### Setup Instructions
 
