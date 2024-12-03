@@ -25,7 +25,7 @@ This bot includes a robust command structure, role management, and specialized a
 
 ## Introduction
 
-Leaf Bot works seamlessly with **SFOth** and **SFOth IV**, making it an essential tool for both of these games. Whether you're playing as an admin, whitelisted player, or simply looking for additional features, Leaf Bot has everything you need to enhance your experience.
+Leaf Bot works seamlessly with **SFOTH** and **SFOTH IV**, making it an essential tool for both of these games. Whether you're playing as an admin, whitelisted player, or simply looking for additional features, Leaf Bot has everything you need to enhance your experience.
 
 In these games, the bot supports:
 - **Whitelist Versions**: V1 and V2, each offering different commands and abilities.
