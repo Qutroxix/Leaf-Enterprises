@@ -1,0 +1,282 @@
+-- Libraries and Services
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ChatService = game:GetService("Chat")
+local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- Configurable Constants
+local CONFIG = {
+    LEAF_OWNER_NAME = "LeafBotOwner",  -- Replace with your account username
+    LEAF_LISTENER_NAME = "LeafBotListener",  -- Listener role
+    SPECIAL_ROLE_NAME = "LeafSpecialRole",  -- Special Role name
+    V1_ROLE_NAME = "LeafV1",  -- Name for V1 whitelist role
+    V2_ROLE_NAME = "LeafV2",  -- Name for V2 whitelist role
+    SPECIAL_ROLE_DISPLAY_NAME = "Leaf Special Role",  -- Display name for Special Role
+}
+
+-- Whitelist and Player Tracking
+local whitelistV1 = {}  -- List of V1 whitelisted players
+local whitelistV2 = {}  -- List of V2 whitelisted players
+local specialRolePlayers = {}  -- Players with both V1 and V2 (Special Role)
+local playerCommands = {}  -- Command cooldown tracking
+
+-- Command Cooldowns
+local commandCooldowns = {
+    ["!LeafAura"] = 5,  -- Cooldown time in seconds for specific commands
+    ["!LeafTeleport"] = 10,
+    ["!Spam"] = 15,
+    ["!LeafRoles"] = 30,  -- New cooldown for the roles command
+    ["!LeafConfig"] = 60,  -- Cooldown for the LeafConfig command
+}
+
+-- Player reference
+local player = Players.LocalPlayer
+
+-- Helper function: Check if player is whitelisted (V1 or V2)
+local function isWhitelisted(player)
+    return whitelistV1[player.Name] or whitelistV2[player.Name]
+end
+
+-- Helper function: Handle command cooldowns
+local function checkCooldown(player, command)
+    local lastExecuted = playerCommands[player.Name] and playerCommands[player.Name][command]
+    if lastExecuted then
+        local timeElapsed = tick() - lastExecuted
+        if timeElapsed < commandCooldowns[command] then
+            return false  -- Command is on cooldown
+        end
+    end
+    return true  -- Command is available for use
+end
+
+local function updateCooldown(player, command)
+    if not playerCommands[player.Name] then
+        playerCommands[player.Name] = {}
+    end
+    playerCommands[player.Name][command] = tick()  -- Update the last executed time for the command
+end
+
+-- Command: Display all whitelisted players (V1, V2, and Special Role)
+local function displayLeafRoles()
+    local v1List = CONFIG.V1_ROLE_NAME .. " Whitelist Players:\n"
+    for _, v in pairs(whitelistV1) do
+        v1List = v1List .. v .. " (" .. CONFIG.V1_ROLE_NAME .. ")\n"
+    end
+
+    local v2List = CONFIG.V2_ROLE_NAME .. " Whitelist Players:\n"
+    for _, v in pairs(whitelistV2) do
+        v2List = v2List .. v .. " (" .. CONFIG.V2_ROLE_NAME .. ")\n"
+    end
+
+    local specialRoleList = CONFIG.SPECIAL_ROLE_DISPLAY_NAME .. " Players (V1 + V2 Combined):\n"
+    for _, v in pairs(specialRolePlayers) do
+        specialRoleList = specialRoleList .. v .. " (" .. CONFIG.SPECIAL_ROLE_DISPLAY_NAME .. ")\n"
+    end
+
+    -- Combine and send to chat
+    local message = v1List .. "\n" .. v2List .. "\n" .. specialRoleList
+    ChatService:Chat(player.Character, message)
+
+    -- Role descriptions and how to obtain them
+    local roleDescriptions = [[
+    🍃 Leaf Bot Roles 🍃
+
+    **]] .. CONFIG.V1_ROLE_NAME .. [[**:  
+    Players who have completed the Leaf V1 challenge and are now whitelisted for basic Leaf Bot features.  
+    *How to obtain*: Complete the V1 challenge given by Leaf Bot.
+
+    **]] .. CONFIG.V2_ROLE_NAME .. [[**:  
+    Players who have completed the Leaf V2 challenge and unlocked advanced Leaf Bot features.  
+    *How to obtain*: Complete the V2 quiz or challenge to unlock the next tier of features.
+
+    **]] .. CONFIG.SPECIAL_ROLE_DISPLAY_NAME .. [[**:  
+    Players who have combined V1 and V2 whitelist, unlocking access to exclusive features like immunity, invisibility, and advanced commands.  
+    *How to obtain*: Use the !Combine command to combine both V1 and V2 whitelists.
+    ]]
+    
+    -- Send descriptions in chat
+    ChatService:Chat(player.Character, roleDescriptions)
+end
+
+-- Command: Display configuration details and how to modify it
+local function displayLeafConfig()
+    local configMessage = [[
+    🍃 Leaf Bot Configuration 🍃
+
+    **LEAF_OWNER_NAME**: 
+    This is the username of the bot owner. You can replace this with your own username. 
+    *How to modify*: Set it to your Roblox username (e.g., "LeafBotOwner").
+
+    **LEAF_LISTENER_NAME**: 
+    The role name given to listeners of the bot. You can change this name to whatever role you want for listeners.
+    *How to modify*: Set it to the desired listener role (e.g., "LeafBotListener").
+
+    **SPECIAL_ROLE_NAME**: 
+    The internal name for the special role that combines V1 and V2. It is used internally to identify players with advanced features.
+    *How to modify*: Set it to the name you want to use for the special role (e.g., "LeafSpecialRole").
+
+    **V1_ROLE_NAME**: 
+    The name for the V1 whitelist role. Players who pass the V1 challenge get this role.
+    *How to modify*: Set it to the name you want for the V1 whitelist (e.g., "LeafV1").
+
+    **V2_ROLE_NAME**: 
+    The name for the V2 whitelist role. Players who pass the V2 challenge get this role.
+    *How to modify*: Set it to the name you want for the V2 whitelist (e.g., "LeafV2").
+
+    **SPECIAL_ROLE_DISPLAY_NAME**: 
+    The name that will be displayed in the chat when referencing the special role.
+    *How to modify*: Set it to the name you want displayed for the special role (e.g., "Leaf Special Role").
+
+    To modify these constants, simply edit the values in the `CONFIG` table at the top of the script. 
+    After that, the changes will take effect immediately upon the next execution.
+    ]]
+
+    -- Send configuration details in chat
+    ChatService:Chat(player.Character, configMessage)
+end
+
+-- Command Handler
+local function handleCommand(command, args)
+    -- Check cooldown before executing command
+    if not checkCooldown(player, command) then
+        ChatService:Chat(player.Character, "Command is on cooldown, please try again later.")
+        return
+    end
+    updateCooldown(player, command)  -- Update cooldown timestamp
+
+    if command == "!Help" then
+        sendLeafBotHelpMessage()
+
+    elseif command == "!LeafAura" then
+        activateLeafAura()
+
+    elseif command == "!LeafTeleport" then
+        if args[1] then
+            local targetPlayer = Players:FindFirstChild(args[1])
+            teleportToPlayer(targetPlayer)
+        else
+            ChatService:Chat(player.Character, "You need to specify a player name.")
+        end
+
+    elseif command == "!SwitchRoles" then
+        switchRoles()
+
+    elseif command == "!LeafStats" then
+        displayLeafStats()
+
+    elseif command == "!LeafCreds" then
+        leafCreds()
+
+    elseif command == "!LeafListener" then
+        leafListenerCommands()
+
+    elseif command == "!Combine" then
+        combineWhitelist()
+
+    elseif command == "!LeafRoles" then
+        displayLeafRoles()  -- Display V1, V2, and Special Role
+
+    elseif command == "!LeafConfig" then
+        displayLeafConfig()  -- Display how to use the configuration
+
+    else
+        ChatService:Chat(player.Character, "Unknown command. Type !Help for a list of available commands.")
+    end
+end
+
+-- Event Listener: Player Chat Input
+local function onPlayerChat(player, message)
+    -- Commands must start with "!" to be recognized
+    if message:sub(1, 1) == "!" then
+        local command, args = message:match("!(%w+)%s*(.*)")
+        args = args and args:split(" ") or {}
+        handleCommand(command, args)
+    end
+end
+
+-- Initialize and Listen for Chat Commands
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        onPlayerChat(player, message)
+    end)
+end)
+
+-- Command Handler
+
+-- Final Helper Function: Send Help Message
+local function sendLeafBotHelpMessage()
+    ChatService:Chat(player.Character, "🍃 Leaf Bot Commands 🍃\n\n" ..
+        "- !Help: Shows this help message.\n" ..
+        "- !LeafAura: Activates a visual green aura around you.\n" ..
+        "- !LeafTeleport <PlayerName>: Teleports to the specified player.\n" ..
+        "- !SwitchRoles: Switch between V1 and V2 whitelist roles.\n" ..
+        "- !LeafStats: Shows the current statistics of the bot.\n" ..
+        "- !LeafCreds: Shows the bot credits and creator information.\n" ..
+        "- !LeafListener: Special commands for Leaf Bot listeners.\n" ..
+        "- !Combine: Combines V1 and V2 whitelists to give special role.\n" ..
+        "- !LeafRoles: Shows a list of all whitelisted players (V1, V2, Special Role).\n" ..
+        "- !LeafConfig: Shows detailed information about how to configure the bot.\n" ..
+        "- More to come as the bot evolves!")
+end
+
+-- Player Chat Commands Handler
+local function onPlayerChat(player, message)
+    -- Commands must start with "!" to be recognized
+    if message:sub(1, 1) == "!" then
+        local command, args = message:match("!(%w+)%s*(.*)")
+        args = args and args:split(" ") or {}
+        handleCommand(command, args)
+    end
+end
+
+-- Initialize and Listen for Chat Commands
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        onPlayerChat(player, message)
+    end)
+end)
+
+-- Final Helper Function: Show Bot Stats
+local function displayLeafStats()
+    local statsMessage = [[
+    🍃 Leaf Bot Statistics 🍃
+
+    Total Players Whitelisted: 
+    V1: ]] .. #whitelistV1 .. [[
+    V2: ]] .. #whitelistV2 .. [[
+    Special Role: ]] .. #specialRolePlayers .. [[
+
+    Total Active Commands Executed: ]] .. #playerCommands .. [[
+    ]]
+    
+    -- Send stats in chat
+    ChatService:Chat(player.Character, statsMessage)
+end
+
+-- Special Role Combining
+local function combineWhitelist()
+    if whitelistV1[player.Name] and whitelistV2[player.Name] then
+        specialRolePlayers[player.Name] = true
+        -- Assign the special role to the player
+        player.Character:SetAttribute("LeafSpecialRole", true)
+        ChatService:Chat(player.Character, "You have successfully combined V1 and V2 whitelist! You now have the special role.")
+    else
+        ChatService:Chat(player.Character, "You need to be whitelisted for both V1 and V2 to obtain the special role.")
+    end
+end
+
+-- Event Listener: Player Added
+Players.PlayerAdded:Connect(function(player)
+    -- Adding player to the appropriate whitelist based on their status (V1, V2, etc.)
+    if player:HasRole(CONFIG.V1_ROLE_NAME) then
+        whitelistV1[player.Name] = true
+    end
+    if player:HasRole(CONFIG.V2_ROLE_NAME) then
+        whitelistV2[player.Name] = true
+    end
+end)
+
+-- The command handling process is now complete, and all features have been added to the bot. 
+-- This includes displaying stats, combining roles, configuring settings, and issuing commands to users.
