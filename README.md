@@ -1,5 +1,3 @@
-Certainly! Here's a complete and detailed README.md that includes everything we've discussed:
-
 # Leaf Bot Project
 
 ![Leaf Bot](https://i.pinimg.com/originals/70/55/c9/7055c99bad359a99e95a9a0bf4849a77.gif)
