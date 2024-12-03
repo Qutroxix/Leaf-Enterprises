@@ -185,7 +185,7 @@ Credits
 
 Creator: LeafCorp (Discord: LeafCorp)
 
-Contributors: Anyone who helps improve the bot.
+Contributors: There are no contributions because i did all of this by myself but idk if I'm gonna like yk put it out and stuff
 
 
 
