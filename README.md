@@ -185,7 +185,7 @@ Credits
 
 Creator: LeafCorp (Discord: LeafCorp)
 
-Contributors: There are no contributions because i did all of this by myself but idk if I'm gonna like yk put it out and stuff
+Contributors: There are no contributions because i did all of this by myself but idk if I'm gonna like yk put it out and stuff (UPDATE IT'S ALREADY OUT LOADSTRING AND EVERYTHING ON PASTEBIN)
 
 
 
