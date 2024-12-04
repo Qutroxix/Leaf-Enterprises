@@ -210,6 +210,6 @@ This `README.md` contains:
 - Customization and configuration guidelines.
 - Licensing information.
 - Credits and contributing section for community involvement.
-
+- Extra info & More Very Important Things For This Entire Repo.
 This structure is clear, professional, and informative for anyone looking to integrate or use the bot in their Roblox game.
 
